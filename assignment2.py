@@ -19,7 +19,9 @@ Description: <Enter your documentation here>
 '''
 
 import argparse
-import os, sys
+import os
+import sys
+
 
 def parse_command_args() -> object:
     "Set up argparse here. Call this function inside main."
@@ -34,8 +36,26 @@ def parse_command_args() -> object:
 # -H human readable
 # -r running only
 
-def percent_to_graph(percent: float, length: int=20) -> str:
-    "turns a percent 0.0 - 1.0 into a bar graph"
+def percent_to_graph(pcnt, max_value):
+    # Validate input
+    if not (0.0 <= pcnt <= 1.0) or not isinstance(max_value, int) or max_value <= 0:
+        return "Invalid input"
+
+    # Calculate the number of '#' and ' ' to represent the percentage
+    num_hashes = int(pcnt * max_value)  # Calculate based on proportion
+    num_spaces = max_value - num_hashes
+
+    # Return the graph representation
+    return "#" * num_hashes + " " * num_spaces
+
+
+    # Calculate the number of '#' and ' ' to represent the percentage
+    num_hashes = int(percentage // 10)  # Each '#' represents 10%
+    num_spaces = 10 - num_hashes       # Remaining spaces to make up 10
+
+    # Return the graph representation
+    return "#" * num_hashes + " " * num_spaces
+
     ...
 # percent to graph function
 
