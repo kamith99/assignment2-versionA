@@ -59,13 +59,26 @@ def percent_to_graph(pcnt, max_value):
     ...
 # percent to graph function
 
-def get_sys_mem() -> int:
-    "return total system memory (used or available) in kB"
-    ...
+def get_sys_mem():
+    """
+    Get total system memory in kilobytes from /proc/meminfo.
+    """
+    with open('/proc/meminfo', 'r') as f:
+        for line in f:
+            if line.startswith('MemTotal'):
+                total_mem = int(line.split()[1])
+                return total_mem
 
-def get_avail_mem() -> int:
-    "return total memory that is available"
-    ...
+def get_avail_mem():
+    """
+    Get available memory in kilobytes from /proc/meminfo.
+    """
+    with open('/proc/meminfo', 'r') as f:
+        for line in f:
+            if line.startswith('MemAvailable'):
+                available_mem = int(line.split()[1])
+                return available_mem
+
 
 def pids_of_prog(app_name: str) -> list:
     "given an app name, return all pids associated with app"
