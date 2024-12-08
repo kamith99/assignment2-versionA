@@ -35,9 +35,6 @@ def parse_command_args():
     args = parser.parse_args()
     return args
 
-# create argparse function
-# -H human readable
-# -r running only
 
 def percent_to_graph(pcnt, max_value):
     # Validate input
