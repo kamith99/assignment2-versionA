@@ -3,8 +3,8 @@
 '''
 OPS445 Assignment 2
 Program: assignment2.py 
-Author: "Student Name"
-Semester: "Enter Winter/Summer/Fall Year"
+Author: Kamith Balasooriya
+Semester: Summer
 
 The python code in this file is original work written by
 "Student Name". No code in this file is copied from any other source 
@@ -14,7 +14,8 @@ with anyone or anything except for submission for grading.
 I understand that the Academic Honesty Policy will be enforced and 
 violators will be reported and appropriate action will be taken.
 
-Description: <Enter your documentation here>
+Description: This script visualizes system memory usage, and can also show memory usage of a specific program. 
+It displays memory usage in a bar chart format, with the option for human-readable memory sizes.
 
 '''
 
@@ -22,11 +23,14 @@ import argparse
 import os
 import sys
 
-
-
 def parse_command_args():
     """
     Parse command-line arguments for the script using argparse.
+
+    This function sets up the command-line interface, allowing the user to specify:
+    - A program name to check memory usage for.
+    - Whether to display memory in human-readable format.
+    - The length of the bar graph representing memory usage.
     """
     parser = argparse.ArgumentParser(description="Memory Visualiser -- See Memory Usage Report with bar charts")
     parser.add_argument('program', nargs='?', help='The program to check memory usage for (optional)')
@@ -38,6 +42,17 @@ def parse_command_args():
 
 
 def percent_to_graph(pcnt, max_value):
+    """ 
+     Convert percentage to a bar graph of '#' characters.
+    
+     Args:
+        pcnt (float): The percentage of memory usage, between 0.0 and 1.0.
+        max_value (int): The maximum length of the bar graph.
+
+    Returns:
+        str: A string representation of the bar graph.
+    
+    """
     # Validate input
     if not (0.0 <= pcnt <= 1.0) or not isinstance(max_value, int) or max_value <= 0:
         return "Invalid input"
@@ -51,8 +66,8 @@ def percent_to_graph(pcnt, max_value):
 
 
     # Calculate the number of '#' and ' ' to represent the percentage
-    num_hashes = int(percentage // 10)  # Each '#' represents 10%
-    num_spaces = 10 - num_hashes       # Remaining spaces to make up 10
+    num_hashes = int(percentage // 10)  # Calculate based on proportion
+    num_spaces = 10 - num_hashes       
 
     # Return the graph representation
     return "#" * num_hashes + " " * num_spaces
@@ -62,6 +77,12 @@ def percent_to_graph(pcnt, max_value):
 def get_sys_mem():
     """
     Get total system memory in kilobytes from /proc/meminfo.
+
+    Reads from the '/proc/meminfo' file to get the total system memory in KiB.
+    
+    Returns:
+        int: Total system memory in kilobytes.
+        
     """
     with open('/proc/meminfo', 'r') as f:
         for line in f:
@@ -72,6 +93,12 @@ def get_sys_mem():
 def get_avail_mem():
     """
     Get available memory in kilobytes from /proc/meminfo.
+
+    Reads from the '/proc/meminfo' file to get the available memory in KiB.
+    
+    Returns:
+        int: Available memory in kilobytes.
+
     """
     with open('/proc/meminfo', 'r') as f:
         for line in f:
@@ -83,6 +110,13 @@ def get_avail_mem():
 def pids_of_prog(app_name: str) -> list:
     """
     Given an app name, return all PIDs associated with the app.
+
+    Args:
+        app_name (str): The name of the program to get the PIDs for.
+
+    Returns:
+        list: A list of process IDs (PIDs) of the given program, or an empty list if not found.
+
     """
     try:
         # Use os.popen to call the "pidof" command and read the output
@@ -96,8 +130,14 @@ def pids_of_prog(app_name: str) -> list:
 
 def rss_mem_of_pid(proc_id: str) -> int:
     """
-    Given a process ID, return the total RSS memory used by the process in kilobytes.
+   Given a process ID, return the total RSS memory used by the process in kilobytes.
     If the PID doesn't exist or the file can't be opened, return 0.
+
+    Args:
+        proc_id (str): The process ID to check.
+
+    Returns:
+        int: The total RSS memory in kilobytes used by the process.
     """
     try:
         # Define the path to the smaps file for the process
@@ -125,12 +165,9 @@ def rss_mem_of_pid(proc_id: str) -> int:
         return 0
 
 
-
-
-
 def bytes_to_human_r(kibibytes: int, decimal_places: int = 2) -> str:
     """
-    Convert memory in kibibytes (KiB) to a human-readable format (e.g., MiB, GiB, TiB).
+        Convert memory in kibibytes (KiB) to a human-readable format (e.g., MiB, GiB, TiB).
 
     Args:
         kibibytes (int): The memory amount in KiB to convert.
@@ -138,6 +175,7 @@ def bytes_to_human_r(kibibytes: int, decimal_places: int = 2) -> str:
 
     Returns:
         str: A string representation of the memory in the most appropriate unit.
+        
     """
     # Define units in increasing order
     suffixes = ['KiB', 'MiB', 'GiB', 'TiB', 'PiB']  # Base-1024 units
