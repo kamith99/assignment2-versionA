@@ -98,9 +98,11 @@ def pids_of_prog(app_name: str) -> list:
 
 
 
-def rss_mem_of_pid(proc_id: str) -> int:
-    "given a process id, return the resident memory used, zero if not found"
-    ...
+#def rss_mem_of_pid(proc_id: str) -> int:
+ 
+
+
+
 
 def bytes_to_human_r(kibibytes: int, decimal_places: int=2) -> str:
     "turn 1,024 into 1 MiB, for example"
