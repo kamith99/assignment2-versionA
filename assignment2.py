@@ -23,6 +23,7 @@ import os
 import sys
 
 
+
 def parse_command_args():
     """
     Parse command-line arguments for the script using argparse.
@@ -127,35 +128,52 @@ def rss_mem_of_pid(proc_id: str) -> int:
 
 
 
-def bytes_to_human_r(kibibytes: int, decimal_places: int=2) -> str:
-    "turn 1,024 into 1 MiB, for example"
-    suffixes = ['KiB', 'MiB', 'GiB', 'TiB', 'PiB']  # iB indicates 1024
-    suf_count = 0
-    result = kibibytes 
-    while result > 1024 and suf_count < len(suffixes):
-        result /= 1024
-        suf_count += 1
-    str_result = f'{result:.{decimal_places}f} '
-    str_result += suffixes[suf_count]
+def bytes_to_human_r(kibibytes: int, decimal_places: int = 2) -> str:
+    """
+    Convert memory in kibibytes (KiB) to a human-readable format (e.g., MiB, GiB, TiB).
+
+    Args:
+        kibibytes (int): The memory amount in KiB to convert.
+        decimal_places (int): Number of decimal places to include in the output.
+
+    Returns:
+        str: A string representation of the memory in the most appropriate unit.
+    """
+    # Define units in increasing order
+    suffixes = ['KiB', 'MiB', 'GiB', 'TiB', 'PiB']  # Base-1024 units
+    suf_count = 0  # Tracks which suffix to use
+    result = kibibytes  # Start with the input in KiB
+
+    # Divide by 1024 until the result is less than 1024 or we run out of suffixes
+    while result > 1024 and suf_count < len(suffixes) - 1:
+        result /= 1024  # Convert to the next higher unit
+        suf_count += 1  # Move to the next suffix
+
+    # Format the result to the specified number of decimal places and add the unit
+    str_result = f'{result:.{decimal_places}f} {suffixes[suf_count]}'
     return str_result
+
 
 if __name__ == "__main__":
     args = parse_command_args()
 
-    if not args.program:  # No program specified
+    if not args.program:  # No specific program provided
         total_mem = get_sys_mem()
         avail_mem = get_avail_mem()
         used_mem = total_mem - avail_mem
         percentage_used = used_mem / total_mem
 
+        # Check for human-readable flag
         if args.human_readable:
-            total_mem = bytes_to_human_r(total_mem)
-            used_mem = bytes_to_human_r(used_mem)
-
-        graph = percent_to_graph(percentage_used, args.length)
-        print(f"System Memory:\nUsed: {used_mem}\tTotal: {total_mem}\n{graph}")
-
-    else:  # Specific program specified
+            total_mem_h = bytes_to_human_r(total_mem)
+            used_mem_h = bytes_to_human_r(used_mem)
+            print(f"System Memory (Human-Readable):\nUsed: {used_mem_h}\tTotal: {total_mem_h}")
+        else:
+            print(f"System Memory:\nUsed: {used_mem} KiB\tTotal: {total_mem} KiB")
+        
+        # Display the bar graph representation
+        print(percent_to_graph(percentage_used, args.length))
+    else:  # Program memory usage
         pids = pids_of_prog(args.program)
         if not pids:
             print(f"No running processes found for program '{args.program}'")
@@ -165,9 +183,13 @@ if __name__ == "__main__":
         total_mem = get_sys_mem()
         percentage_used = total_rss / total_mem
 
+        # Check for human-readable flag
         if args.human_readable:
-            total_mem = bytes_to_human_r(total_mem)
-            total_rss = bytes_to_human_r(total_rss)
-
-        graph = percent_to_graph(percentage_used, args.length)
-        print(f"Memory Usage for '{args.program}':\nUsed: {total_rss}\tTotal: {total_mem}\n{graph}")
+            total_mem_h = bytes_to_human_r(total_mem)
+            total_rss_h = bytes_to_human_r(total_rss)
+            print(f"Memory Usage for '{args.program}' (Human-Readable):\nUsed: {total_rss_h}\tTotal: {total_mem_h}")
+        else:
+            print(f"Memory Usage for '{args.program}':\nUsed: {total_rss} KiB\tTotal: {total_mem} KiB")
+        
+        # Display the bar graph representation
+        print(percent_to_graph(percentage_used, args.length))
