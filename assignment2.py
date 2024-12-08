@@ -195,7 +195,7 @@ def bytes_to_human_r(kibibytes: int, decimal_places: int = 2) -> str:
 if __name__ == "__main__":
     args = parse_command_args()
 
-    if not args.program:  # No specific program provided
+    if not args.program: # No specific program provided
         total_mem = get_sys_mem()
         avail_mem = get_avail_mem()
         used_mem = total_mem - avail_mem
