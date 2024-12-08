@@ -57,7 +57,6 @@ def percent_to_graph(pcnt, max_value):
     return "#" * num_hashes + " " * num_spaces
 
     ...
-# percent to graph function
 
 def get_sys_mem():
     """
@@ -142,23 +141,33 @@ def bytes_to_human_r(kibibytes: int, decimal_places: int=2) -> str:
 
 if __name__ == "__main__":
     args = parse_command_args()
-    if not args.program:
-        ...
-    else:
-        ...
-    # process args
-    # if no parameter passed, 
-    # open meminfo.
-    # get used memory
-    # get total memory
-    # call percent to graph
-    # print
 
-    # if a parameter passed:
-    # get pids from pidof
-    # lookup each process id in /proc
-    # read memory used
-    # add to total used
-    # percent to graph
-    # take total our of total system memory? or total used memory? total used memory.
-    # percent to graph.
+    if not args.program:  # No program specified
+        total_mem = get_sys_mem()
+        avail_mem = get_avail_mem()
+        used_mem = total_mem - avail_mem
+        percentage_used = used_mem / total_mem
+
+        if args.human_readable:
+            total_mem = bytes_to_human_r(total_mem)
+            used_mem = bytes_to_human_r(used_mem)
+
+        graph = percent_to_graph(percentage_used, args.length)
+        print(f"System Memory:\nUsed: {used_mem}\tTotal: {total_mem}\n{graph}")
+
+    else:  # Specific program specified
+        pids = pids_of_prog(args.program)
+        if not pids:
+            print(f"No running processes found for program '{args.program}'")
+            sys.exit(1)
+
+        total_rss = sum(rss_mem_of_pid(pid) for pid in pids)
+        total_mem = get_sys_mem()
+        percentage_used = total_rss / total_mem
+
+        if args.human_readable:
+            total_mem = bytes_to_human_r(total_mem)
+            total_rss = bytes_to_human_r(total_rss)
+
+        graph = percent_to_graph(percentage_used, args.length)
+        print(f"Memory Usage for '{args.program}':\nUsed: {total_rss}\tTotal: {total_mem}\n{graph}")
