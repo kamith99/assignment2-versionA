@@ -97,9 +97,36 @@ def pids_of_prog(app_name: str) -> list:
         return []
 
 
+def rss_mem_of_pid(proc_id: str) -> int:
+    """
+    Given a process ID, return the total RSS memory used by the process in kilobytes.
+    If the PID doesn't exist or the file can't be opened, return 0.
+    """
+    try:
+        # Define the path to the smaps file for the process
+        smaps_path = f'/proc/{proc_id}/smaps'
+        
+        # Open the smaps file to read the memory usage
+        with open(smaps_path, 'r') as smaps_file:
+            total_rss = 0
+            # Read through each line in the smaps file
+            for line in smaps_file:
+                # Look for lines that contain "Rss" (resident set size) information
+                if line.startswith('Rss'):
+                    # Each Rss line contains the memory size in kilobytes
+                    rss_kb = int(line.split()[1])  # Extract the value and convert it to integer
+                    total_rss += rss_kb  # Accumulate the RSS memory
 
-#def rss_mem_of_pid(proc_id: str) -> int:
- 
+            # Return the total RSS memory found in kilobytes
+            return total_rss
+    except FileNotFoundError:
+        # If the process does not exist or smaps file cannot be opened, return 0
+        return 0
+    except Exception as e:
+        # In case of any unexpected error, print and return 0
+        print(f"Error reading smaps for PID {proc_id}: {e}")
+        return 0
+
 
 
 
